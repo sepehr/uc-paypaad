@@ -9,7 +9,7 @@
 /**
  * Implements hook_menu().
  */
-function uc_pasargad_menu() {
+function uc_paypaad_menu() {
 
 }
 
