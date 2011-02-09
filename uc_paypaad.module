@@ -37,18 +37,20 @@ function uc_paypaad_menu() {
  * @todo Add option to display bank logo beside the name.
  */
 function uc_paypaad_payment_method() {
-  $methods[] = array(
-    'id' => 'paypaad',
-    'name' => t('Paypaad Payment'),
-    'title' => t('Paypaad Payment'),
-    'desc'  => t('Redirect to Pasargad bank paypaad gateway.'),
-    'callback' => 'uc_paypaad_settings',
-    'weight' => 1,
-    'checkout' => TRUE,
-    'no_gateway' => TRUE,
-  );
+  if (_uc_paypaad_settings_ok()) {
+    $methods[] = array(
+      'id' => 'paypaad',
+      'name' => t('Paypaad Payment'),
+      'title' => t('Paypaad Payment'),
+      'desc'  => t('Redirect to Pasargad bank paypaad gateway.'),
+      'callback' => 'uc_paypaad_settings',
+      'weight' => 1,
+      'checkout' => TRUE,
+      'no_gateway' => TRUE,
+    );
 
-  return $methods;
+    return $methods;
+  }
 }
 
 /**
@@ -84,75 +86,86 @@ function uc_paypaad_ucga_display() {
  * Introduces Paypaad Payment settings form to Ubercart.
  */
 function uc_paypaad_settings($op, &$arg1) {
-  if ($op != 'settings') {
-    return;
+  if ($op == 'settings') {
+    $form = array();
+    // Paypaad merchant code.
+    $form['uc_paypaad_merchant'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Merchant Code'),
+      '#description' => t('Enter the merchant code provided by Pasargad Bank.'),
+      '#default_value' => variable_get('uc_paypaad_merchant', ''),
+      '#required' => TRUE,
+    );
+    // Paypaad terminal code.
+    $form['uc_paypaad_terminal'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Terminal Code'),
+      '#description' => t('Enter the terminal code provided by Pasargad Bank.'),
+      '#default_value' => variable_get('uc_paypaad_terminal', ''),
+      '#required' => TRUE,
+    );
+    // Private PEM key path.
+    $form['uc_paypaad_private_key'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Private key file'),
+      '#description' => t('Accessible absolute system path to your private key PEM file.'),
+      '#default_value' => variable_get('uc_paypaad_private_key', ''),
+      '#required' => TRUE,
+    );
+    // Maximum product delivery days.
+    $form['uc_paypaad_max_delivery_days'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Maximum number of delivery days'),
+      '#description' => t('Maximum number of days in which the product will be delivered to customer.'),
+      '#default_value' => variable_get('uc_paypaad_max_delivery_days', ''),
+      '#required' => TRUE,
+    );
+    // Paypaad gateway URIs.
+    $form['additional'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Additional options'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    // Paypaad gateway trace URI.
+    $form['additional']['uc_paypaad_trace_uri'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Paypaad gateway controller URI'),
+      '#description' => t('Do not change the default value unless you checked that Paypaad docs and it has changed.'),
+      '#default_value' => variable_get('uc_paypaad_trace_uri', PAYPAAD_TRACE_URI),
+      '#required' => TRUE,
+    );
+    // Paypaad gateway controller URI.
+    $form['additional']['uc_paypaad_controller_uri'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Paypaad gateway controller URI'),
+      '#description' => t('Do not change the default value unless you checked that Paypaad docs and it has changed.'),
+      '#default_value' => variable_get('uc_paypaad_controller_uri', PAYPAAD_CONTROLLER_URI),
+      '#required' => TRUE,
+    );
+
+    return $form;
   }
-
-  // Define settings form.
-  $form = array();
-
-  $form['uc_paypaad_merchant_code'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Merchant Code'),
-    '#description' => t('Enter the merchant code provided by Pasargad Bank.'),
-    '#default_value' => variable_get('uc_paypaad_merchant_code', ''),
-    '#required' => TRUE,
-  );
-
-  $form['uc_paypaad_terminal_code'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Terminal Code'),
-    '#description' => t('Enter the terminal code provided by Pasargad Bank.'),
-    '#default_value' => variable_get('uc_paypaad_terminal_code', ''),
-    '#required' => TRUE,
-  );
-
-  $form['uc_paypaad_private_key_path'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Private key file'),
-    '#description' => t('Accessible absolute system path to your private key PEM file.'),
-    '#default_value' => variable_get('uc_paypaad_private_key_path', ''),
-    '#required' => TRUE,
-  );
-
-  $form['uc_paypaad_max_delivery_days'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Maximum number of delivery days'),
-    '#description' => t('Maximum number of days in which the product will be delivered to customer.'),
-    '#default_value' => variable_get('uc_paypaad_max_delivery_days', 1),
-    '#required' => TRUE,
-  );
-
-  $form['additional'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Additional options'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-
-  $form['additional']['uc_paypaad_trace_uri'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Paypaad gateway controller URI'),
-    '#description' => t('Do not change the default value unless you checked that Paypaad docs and it has changed.'),
-    '#default_value' => variable_get('uc_paypaad_trace_uri', PAYPAAD_TRACE_URI),
-    '#required' => TRUE,
-  );
-
-  $form['additional']['uc_paypaad_controller_uri'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Paypaad gateway controller URI'),
-    '#description' => t('Do not change the default value unless you checked that Paypaad docs and it has changed.'),
-    '#default_value' => variable_get('uc_paypaad_controller_uri', PAYPAAD_CONTROLLER_URI),
-    '#required' => TRUE,
-  );
-
-  return $form;
 }
 
 /**
- * Menu access callback that ensures every access to defined paths will be served.
+ * Menu paths access callback.
+ *
+ * Ensures a free access to defined paths.
  */
 function uc_paypaad_access() {
   return TRUE;
+}
+
+/**
+ * Internal helper that ensures gateway settings set.
+ *
+ * @return
+ *   TRUE if all required configs are set, FALSE otherwise.
+ */
+function _uc_paypaad_settings_ok() {
+  return (variable_get('uc_paypaad_merchant', FALSE) &&
+          variable_get('uc_paypaad_terminal', FALSE) &&
+          variable_get('uc_paypaad_private_key', FALSE)) ? TRUE : FALSE;
 }
 
