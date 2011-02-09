@@ -139,6 +139,17 @@ function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, &$form_state
 }
 
 /**
+ * Implements hook_ucga_display().
+ *
+ * @see http://api.ubercart.org/api/function/hook_ucga_display/2
+ */
+function uc_paypaad_ucga_display() {
+  if (implode('/', arg()) == 'cart/paypaad/complete') {
+    return TRUE;
+  }
+}
+
+/**
  * Menu access callback that ensures every access to defined path will be served.
  */
 function uc_paypaad_access() {
