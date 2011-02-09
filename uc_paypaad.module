@@ -36,7 +36,7 @@ function uc_paypaad_menu() {
  */
 function uc_paypaad_payment_method() {
   global $base_url;
-  $logo = $base_url . '/' . drupal_get_path('module', 'uc_paypaad') . '/uc_paypaad.png';
+  $logo = $base_url . '/' . drupal_get_path('module', 'uc_paypaad') . '/uc_paypaad.gif';
 
   $methods[] = array(
     'id' => 'paypaad',
@@ -97,17 +97,9 @@ function uc_payment_method_paypaad($op, &$arg1) {
 
   $form['additional'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Additional settings'),
+    '#title' => t('Additional options'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-  );
-
-  $form['additional']['uc_paypaad_controller_uri'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Paypaad gateway controller URI'),
-    '#description' => t('Do not change the default value unless you checked that Paypaad docs and it has changed.'),
-    '#default_value' => variable_get('uc_paypaad_controller_uri', PAYPAAD_CONTROLLER_URI),
-    '#required' => TRUE,
   );
 
   $form['additional']['uc_paypaad_trace_uri'] = array(
@@ -115,6 +107,14 @@ function uc_payment_method_paypaad($op, &$arg1) {
     '#title' => t('Paypaad gateway controller URI'),
     '#description' => t('Do not change the default value unless you checked that Paypaad docs and it has changed.'),
     '#default_value' => variable_get('uc_paypaad_trace_uri', PAYPAAD_TRACE_URI),
+    '#required' => TRUE,
+  );
+
+  $form['additional']['uc_paypaad_controller_uri'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Paypaad gateway controller URI'),
+    '#description' => t('Do not change the default value unless you checked that Paypaad docs and it has changed.'),
+    '#default_value' => variable_get('uc_paypaad_controller_uri', PAYPAAD_CONTROLLER_URI),
     '#required' => TRUE,
   );
 
