@@ -37,20 +37,20 @@ function uc_paypaad_menu() {
  * @todo Add option to display bank logo beside the name.
  */
 function uc_paypaad_payment_method() {
-  if (_uc_paypaad_settings_ok()) {
-    $methods[] = array(
-      'id' => 'paypaad',
-      'name' => t('Paypaad Payment'),
-      'title' => t('Paypaad Payment'),
-      'desc'  => t('Redirect to Pasargad bank paypaad gateway.'),
-      'callback' => 'uc_paypaad_settings',
-      'weight' => 1,
-      'checkout' => TRUE,
-      'no_gateway' => TRUE,
-    );
+  $methods = array();
 
-    return $methods;
-  }
+  $methods[] = array(
+    'id' => 'paypaad',
+    'name' => t('Paypaad Payment'),
+    'title' => t('Paypaad Payment'),
+    'desc'  => t('Redirect to Pasargad bank paypaad gateway.'),
+    'callback' => 'uc_paypaad_settings',
+    'weight' => 1,
+    'checkout' => TRUE,
+    'no_gateway' => TRUE,
+  );
+
+  return $methods;
 }
 
 /**
@@ -59,16 +59,25 @@ function uc_paypaad_payment_method() {
  * Alters the "action" attribute of the order review form,
  * so we can perform aditional actions to send user to gateway.
  */
-function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, &$form_state, $form_id) {
+function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, $form_state) {
   // Check order identifier.
   $order_id = intval($_SESSION['cart_order']);
   if ($order_id > 0) {
     $order = uc_order_load($order_id);
-    // Alter form action.
+    // Alter form's action.
     if ($order->payment_method == 'paypaad') {
       $form['#action'] = url('cart/paypaad/request');
     }
   }
+}
+
+/**
+ * Implements hook_form_alter() for uc_payment_methods_form.
+ *
+ * Attaches an aditional form validation callback.
+ */
+function uc_paypaad_form_uc_payment_methods_form_alter(&$form, $form_state) {
+  $form['#validate'][] = 'uc_paypaad_settings_validate';
 }
 
 /**
@@ -149,23 +158,41 @@ function uc_paypaad_settings($op, &$arg1) {
 }
 
 /**
+ * Form validation callback for settings form.
+ */
+function uc_paypaad_settings_validate($form, &$form_state) {
+  // Check merchant code for a 9-digit number.
+  if (!ctype_digit($form_state['values']['uc_paypaad_merchant']) || !isset($form_state['values']['uc_paypaad_merchant'][8])) {
+    form_set_error('uc_paypaad_merchant', t('Paypaad merchant code must be a 9-digit numeric value.'));
+  }
+  // Check terminal code for a 10-digit number.
+  if (!ctype_digit($form_state['values']['uc_paypaad_terminal']) || !isset($form_state['values']['uc_paypaad_terminal'][9])) {
+    form_set_error('uc_paypaad_terminal', t('Paypaad terminal code must be a 10-digit numeric value.'));
+  }
+  // Check delivery days for a positive number.
+  if (!ctype_digit($form_state['values']['uc_paypaad_max_delivery_days'])) {
+    form_set_error('uc_paypaad_max_delivery_days', t('Maximum delivery days must be a positive number.'));
+  }
+  // Check private key file path.
+  if (!is_readable($form_state['values']['uc_paypaad_private_key'])) {
+    form_set_error('uc_paypaad_private_key', t('Private key file is not a valid readable file.'));
+  }
+  // Check gateway trace URL.
+  if (!valid_url($form_state['values']['uc_paypaad_trace_uri'], TRUE)) {
+    form_set_error('uc_paypaad_trace_uri', t('Paypaad gateway trace URI must be a valid URL.'));
+  }
+  // Check gateway controller URL.
+  if (!valid_url($form_state['values']['uc_paypaad_controller_uri'], TRUE)) {
+    form_set_error('uc_paypaad_controller_uri', t('Paypaad gateway controller URI must be a valid URL.'));
+  }
+}
+
+/**
  * Menu paths access callback.
  *
  * Ensures a free access to defined paths.
  */
 function uc_paypaad_access() {
   return TRUE;
-}
-
-/**
- * Internal helper that ensures gateway settings set.
- *
- * @return
- *   TRUE if all required configs are set, FALSE otherwise.
- */
-function _uc_paypaad_settings_ok() {
-  return (variable_get('uc_paypaad_merchant', FALSE) &&
-          variable_get('uc_paypaad_terminal', FALSE) &&
-          variable_get('uc_paypaad_private_key', FALSE)) ? TRUE : FALSE;
 }
 
