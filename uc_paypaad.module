@@ -10,6 +10,24 @@
  * Implements hook_menu().
  */
 function uc_paypaad_menu() {
+  $items = array();
 
+  $items['cart/paypaad/request'] = array(
+    'title' => 'Order payment request',
+    'page callback' => 'uc_paypaad_request',
+    'access callback' => 'uc_paypaad_request_access',
+    'file' => 'uc_paypaad.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['cart/paypaad/complete'] = array(
+    'title' => 'Order payment complete',
+    'page callback' => 'uc_paypaad_complete',
+    'access callback' => 'uc_paypaad_complete_access',
+    'file' => 'uc_paypaad.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
 }
 
