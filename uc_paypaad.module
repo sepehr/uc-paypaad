@@ -52,3 +52,72 @@ function uc_paypaad_payment_method() {
   return $methods;
 }
 
+/**
+ * Introduces Paypaad Payment settings form to Ubercart.
+ */
+function uc_payment_method_paypaad($op, &$arg1) {
+  if ($op != 'settings') {
+    return;
+  }
+
+  // Define settings form.
+  $form = array();
+
+  $form['uc_paypaad_merchant_code'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Merchant Code'),
+    '#description' => t('Enter the merchant code provided by Pasargad Bank.'),
+    '#default_value' => variable_get('uc_paypaad_merchant_code', ''),
+    '#required' => TRUE,
+  );
+
+  $form['uc_paypaad_terminal_code'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Terminal Code'),
+    '#description' => t('Enter the terminal code provided by Pasargad Bank.'),
+    '#default_value' => variable_get('uc_paypaad_terminal_code', ''),
+    '#required' => TRUE,
+  );
+
+  $form['uc_paypaad_private_key_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Private key file'),
+    '#description' => t('Accessible absolute system path to your private key PEM file.'),
+    '#default_value' => variable_get('uc_paypaad_private_key_path', ''),
+    '#required' => TRUE,
+  );
+
+  $form['uc_paypaad_max_delivery_days'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Maximum number of delivery days'),
+    '#description' => t('Maximum number of days in which the product will be delivered to customer.'),
+    '#default_value' => variable_get('uc_paypaad_max_delivery_days', 1),
+    '#required' => TRUE,
+  );
+
+  $form['additional'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Additional settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['additional']['uc_paypaad_controller_uri'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Paypaad gateway controller URI'),
+    '#description' => t('Do not change the default value unless you checked that Paypaad docs and it has changed.'),
+    '#default_value' => variable_get('uc_paypaad_controller_uri', PAYPAAD_CONTROLLER_URI),
+    '#required' => TRUE,
+  );
+
+  $form['additional']['uc_paypaad_trace_uri'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Paypaad gateway controller URI'),
+    '#description' => t('Do not change the default value unless you checked that Paypaad docs and it has changed.'),
+    '#default_value' => variable_get('uc_paypaad_trace_uri', PAYPAAD_TRACE_URI),
+    '#required' => TRUE,
+  );
+
+  return $form;
+}
+
