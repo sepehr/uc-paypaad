@@ -33,6 +33,8 @@ function uc_paypaad_menu() {
 
 /**
  * Implements hook_payment_method().
+ *
+ * @todo Add option to display bank logo beside the name.
  */
 function uc_paypaad_payment_method() {
   $methods[] = array(
