@@ -121,6 +121,24 @@ function uc_payment_method_paypaad($op, &$arg1) {
 }
 
 /**
+ * Implements hook_form_alter() for uc_cart_checkout_review_form.
+ *
+ * Alters the "action" attribute of the order review form,
+ * so we can perform aditional actions to send user to gateway.
+ */
+function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, &$form_state, $form_id) {
+  // Check order identifier.
+  $order_id = intval($_SESSION['cart_order']);
+  if ($order_id > 0) {
+    $order = uc_order_load($order_id);
+    // Alter form action.
+    if ($order->payment_method == 'paypaad') {
+      $form['#action'] = url('cart/paypaad/request');
+    }
+  }
+}
+
+/**
  * Menu access callback that ensures every access to defined path will be served.
  */
 function uc_paypaad_access() {
