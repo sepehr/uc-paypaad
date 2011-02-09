@@ -1,0 +1,23 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Contains un/installation hook implementations.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function MODULE_install() {
+
+}
+
+
+/**
+ * Implements hook_uninstall().
+ */
+function MODULE_uninstall() {
+
+}
+

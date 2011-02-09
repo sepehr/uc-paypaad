@@ -1,0 +1,15 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Contains necessary hook implementations, callbacks & helpers.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function uc_pasargad_menu() {
+
+}
+
