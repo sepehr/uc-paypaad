@@ -35,14 +35,11 @@ function uc_paypaad_menu() {
  * Implements hook_payment_method().
  */
 function uc_paypaad_payment_method() {
-  global $base_url;
-  $logo = $base_url . '/' . drupal_get_path('module', 'uc_paypaad') . '/uc_paypaad.gif';
-
   $methods[] = array(
     'id' => 'paypaad',
     'name' => t('Paypaad Payment'),
-    'title' => theme('image', $logo, '', t('Pay via Pasargad Bank Paypaad'), array('height' => 25, 'width' => 25), FALSE) . t('Paypaad Payment'),
-    'desc' => t('Redirect to Pasargad bank paypaad gateway.'),
+    'title' => t('Paypaad Payment'),
+    'desc'  => t('Redirect to Pasargad bank paypaad gateway.'),
     'callback' => 'uc_payment_method_paypaad',
     'weight' => 1,
     'checkout' => TRUE,
