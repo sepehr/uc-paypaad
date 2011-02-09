@@ -15,7 +15,7 @@ function uc_paypaad_menu() {
   $items['cart/paypaad/request'] = array(
     'title' => 'Order payment request',
     'page callback' => 'uc_paypaad_request',
-    'access callback' => 'uc_paypaad_request_access',
+    'access callback' => 'uc_paypaad_access',
     'file' => 'uc_paypaad.inc',
     'type' => MENU_CALLBACK,
   );
@@ -23,7 +23,7 @@ function uc_paypaad_menu() {
   $items['cart/paypaad/complete'] = array(
     'title' => 'Order payment complete',
     'page callback' => 'uc_paypaad_complete',
-    'access callback' => 'uc_paypaad_complete_access',
+    'access callback' => 'uc_paypaad_access',
     'file' => 'uc_paypaad.inc',
     'type' => MENU_CALLBACK,
   );
@@ -119,5 +119,12 @@ function uc_payment_method_paypaad($op, &$arg1) {
   );
 
   return $form;
+}
+
+/**
+ * Menu access callback that ensures every access to defined path will be served.
+ */
+function uc_paypaad_access() {
+  return TRUE;
 }
 
