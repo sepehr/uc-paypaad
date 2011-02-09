@@ -42,7 +42,7 @@ function uc_paypaad_payment_method() {
     'name' => t('Paypaad Payment'),
     'title' => t('Paypaad Payment'),
     'desc'  => t('Redirect to Pasargad bank paypaad gateway.'),
-    'callback' => 'uc_payment_method_paypaad',
+    'callback' => 'uc_paypaad_settings',
     'weight' => 1,
     'checkout' => TRUE,
     'no_gateway' => TRUE,
@@ -52,9 +52,38 @@ function uc_paypaad_payment_method() {
 }
 
 /**
+ * Implements hook_form_alter() for uc_cart_checkout_review_form.
+ *
+ * Alters the "action" attribute of the order review form,
+ * so we can perform aditional actions to send user to gateway.
+ */
+function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, &$form_state, $form_id) {
+  // Check order identifier.
+  $order_id = intval($_SESSION['cart_order']);
+  if ($order_id > 0) {
+    $order = uc_order_load($order_id);
+    // Alter form action.
+    if ($order->payment_method == 'paypaad') {
+      $form['#action'] = url('cart/paypaad/request');
+    }
+  }
+}
+
+/**
+ * Implements hook_ucga_display().
+ *
+ * @see http://api.ubercart.org/api/function/hook_ucga_display/2
+ */
+function uc_paypaad_ucga_display() {
+  if (implode('/', arg()) == 'cart/paypaad/complete') {
+    return TRUE;
+  }
+}
+
+/**
  * Introduces Paypaad Payment settings form to Ubercart.
  */
-function uc_payment_method_paypaad($op, &$arg1) {
+function uc_paypaad_settings($op, &$arg1) {
   if ($op != 'settings') {
     return;
   }
@@ -121,36 +150,7 @@ function uc_payment_method_paypaad($op, &$arg1) {
 }
 
 /**
- * Implements hook_form_alter() for uc_cart_checkout_review_form.
- *
- * Alters the "action" attribute of the order review form,
- * so we can perform aditional actions to send user to gateway.
- */
-function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, &$form_state, $form_id) {
-  // Check order identifier.
-  $order_id = intval($_SESSION['cart_order']);
-  if ($order_id > 0) {
-    $order = uc_order_load($order_id);
-    // Alter form action.
-    if ($order->payment_method == 'paypaad') {
-      $form['#action'] = url('cart/paypaad/request');
-    }
-  }
-}
-
-/**
- * Implements hook_ucga_display().
- *
- * @see http://api.ubercart.org/api/function/hook_ucga_display/2
- */
-function uc_paypaad_ucga_display() {
-  if (implode('/', arg()) == 'cart/paypaad/complete') {
-    return TRUE;
-  }
-}
-
-/**
- * Menu access callback that ensures every access to defined path will be served.
+ * Menu access callback that ensures every access to defined paths will be served.
  */
 function uc_paypaad_access() {
   return TRUE;
