@@ -59,22 +59,11 @@ function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, $form_state)
     // Alter the form if the it's a Paypaad payment.
     if ($order->payment_method == 'paypaad') {
       // Prepare the order object in form of Paypaad compatible
-      // arrays of invoice and products, then builds the XML and
-      // signed output of these arrays using Paypaad Payment API
-      // module. TODO: This should be moved to the API module.
-      if ($content = _uc_paypaad_prepare($order)) {
+      // arrays of invoice and products, then build the XML and
+      // sign its copy using user provided private key.
+      if (list($content, $sign) = _uc_paypaad_prepare($order)) {
         // Inject hidden fields.
-        // TODO: This should be moved to API module as UI helper.
-        // Inject XML invoice.
-        $form['content'] = array(
-          '#type' => 'hidden',
-          '#value' => $content['xml'],
-        );
-        // Inject signed copy of XML invoice.
-        $form['sign'] = array(
-          '#type' => 'hidden',
-          '#value' => $content['sign'],
-        );
+        paypaad_hidden_fields($content, $sign, $form);
         // And update the form action.
         $form['#action'] = variable_get('uc_paypaad_controller_uri', PAYPAAD_CONTROLLER_URI);
       }
@@ -88,7 +77,7 @@ function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, $form_state)
  * Attaches an aditional form validation callback.
  */
 function uc_paypaad_form_uc_payment_methods_form_alter(&$form, $form_state) {
-  $form['#validate'][] = 'uc_paypaad_settings_validate';
+  $form['#validate'][] = 'paypaad_settings_fields_validate';
 }
 
 /**
@@ -107,94 +96,7 @@ function uc_paypaad_ucga_display() {
  */
 function uc_paypaad_settings($op, &$arg1) {
   if ($op == 'settings') {
-    $form = array();
-    // Paypaad merchant code.
-    $form['uc_paypaad_merchant'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Merchant Code'),
-      '#description' => t('Enter the merchant code provided by Pasargad Bank.'),
-      '#default_value' => variable_get('uc_paypaad_merchant', ''),
-      '#required' => TRUE,
-    );
-    // Paypaad terminal code.
-    $form['uc_paypaad_terminal'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Terminal Code'),
-      '#description' => t('Enter the terminal code provided by Pasargad Bank.'),
-      '#default_value' => variable_get('uc_paypaad_terminal', ''),
-      '#required' => TRUE,
-    );
-    // Private PEM key path.
-    $form['uc_paypaad_private_key'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Private key file'),
-      '#description' => t('Accessible absolute system path to your private key PEM file.'),
-      '#default_value' => variable_get('uc_paypaad_private_key', ''),
-      '#required' => TRUE,
-    );
-    // Maximum product delivery days.
-    $form['uc_paypaad_max_delivery_days'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Maximum number of delivery days'),
-      '#description' => t('Maximum number of days in which the product will be delivered to customer.'),
-      '#default_value' => variable_get('uc_paypaad_max_delivery_days', ''),
-      '#required' => TRUE,
-    );
-    // Paypaad gateway URIs.
-    $form['additional'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Additional options'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
-    // Paypaad gateway trace URI.
-    $form['additional']['uc_paypaad_trace_uri'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Paypaad gateway controller URI'),
-      '#description' => t('Do not change the default value unless you checked that Paypaad docs and it has changed.'),
-      '#default_value' => variable_get('uc_paypaad_trace_uri', PAYPAAD_TRACE_URI),
-      '#required' => TRUE,
-    );
-    // Paypaad gateway controller URI.
-    $form['additional']['uc_paypaad_controller_uri'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Paypaad gateway controller URI'),
-      '#description' => t('Do not change the default value unless you checked that Paypaad docs and it has changed.'),
-      '#default_value' => variable_get('uc_paypaad_controller_uri', PAYPAAD_CONTROLLER_URI),
-      '#required' => TRUE,
-    );
-
-    return $form;
-  }
-}
-
-/**
- * Form validation callback for settings form.
- */
-function uc_paypaad_settings_validate($form, &$form_state) {
-  // Check merchant code for a 9-digit number.
-  if (!ctype_digit($form_state['values']['uc_paypaad_merchant']) || !isset($form_state['values']['uc_paypaad_merchant'][8])) {
-    form_set_error('uc_paypaad_merchant', t('Paypaad merchant code must be a 9-digit numeric value.'));
-  }
-  // Check terminal code for a 10-digit number.
-  if (!ctype_digit($form_state['values']['uc_paypaad_terminal']) || !isset($form_state['values']['uc_paypaad_terminal'][9])) {
-    form_set_error('uc_paypaad_terminal', t('Paypaad terminal code must be a 10-digit numeric value.'));
-  }
-  // Check delivery days for a positive number.
-  if (!ctype_digit($form_state['values']['uc_paypaad_max_delivery_days'])) {
-    form_set_error('uc_paypaad_max_delivery_days', t('Maximum delivery days must be a positive number.'));
-  }
-  // Check private key file path.
-  if (!is_readable($form_state['values']['uc_paypaad_private_key'])) {
-    form_set_error('uc_paypaad_private_key', t('Private key file is not a valid readable file.'));
-  }
-  // Check gateway trace URL.
-  if (!valid_url($form_state['values']['uc_paypaad_trace_uri'], TRUE)) {
-    form_set_error('uc_paypaad_trace_uri', t('Paypaad gateway trace URI must be a valid URL.'));
-  }
-  // Check gateway controller URL.
-  if (!valid_url($form_state['values']['uc_paypaad_controller_uri'], TRUE)) {
-    form_set_error('uc_paypaad_controller_uri', t('Paypaad gateway controller URI must be a valid URL.'));
+    return paypaad_settings_fields();
   }
 }
 
@@ -214,8 +116,8 @@ function uc_paypaad_access() {
  *   Ubercart order object.
  *
  * @return
- *   Either an array of invoice XML representation
- *   and its signed copy or FALSE on operation failure.
+ *   Either an array of invoice XML representation and
+ *   its signed copy, or FALSE on operation failure.
  *
  * @todo
  *   Move to API module as a UC API Helper.
