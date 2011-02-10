@@ -214,3 +214,62 @@ function uc_paypaad_access() {
   return TRUE;
 }
 
+/**
+ * Internal helper that build Paypaad compatible data out of an Ubercart order object.
+ *
+ * @param $order
+ *   Ubercart order object.
+ *
+ * @return
+ *   Either an array of invoice XML representation
+ *   and its signed copy or FALSE on operation failure.
+ *
+ * @todo
+ *   Move to API module as a UC API Helper.
+ */
+function _uc_paypaad_prepare(&$order) {
+  // Partially check requirements.
+  if (!is_object($order)) {
+    return FALSE;
+  }
+
+  // Build content array out of the $order.
+  $content = array(
+    'items' => array(),
+    'invoice_number' => $order->order_id,
+    'buyer_tel' => $order->billing_phone,
+    'total_amount' => $order->order_total,
+    'merchant_code'  => variable_get('uc_paypaad_merchant', ''),
+    'terminal_code'  => variable_get('uc_paypaad_terminal', ''),
+    'delivery_days' => variable_get('uc_paypaad_max_delivery_days', 1),
+    'buyer_name' => $order->billing_first_name . ' ' . $order->billing_last_name,
+    'delivery_address' => str_replace('<br />', ' - ', uc_order_address($order, 'billing')),
+    'redirect_address' => 'http://cart.dev/?redirect',
+    'referer_address'  => 'http://cart.dev/?referer',
+  );
+  // Build items (products) array.
+  foreach ($order->products as $index => $product) {
+    $content['items'][] = array(
+      'fee' => $product->price,
+      'count' => $product->qty,
+      'number' => (int) $index + 1,
+      'content' => $product->title,
+      'amount' => intval($product->qty) * intval($product->price),
+      'description' => $product->qty . ' x ' . $product->price . ' - ' . $product->title,
+    );
+  }
+  // And also their XML representation.
+  if ($content = paypaad_xml($content, array(), TRUE)) {
+    // Then the signature. "file://" make openssl_pkey_get_private() understand that it's a path.
+    if ($sign = paypaad_sign($content, 'file://' . variable_get('uc_paypaad_private_key', ''))) {
+      // Return an array of content & signature.
+      return array(
+        'sign' => $sign,
+        'xml'  => $content,
+      );
+    }
+  }
+  // Failure.
+  return FALSE;
+}
+
