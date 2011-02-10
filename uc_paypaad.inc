@@ -11,7 +11,7 @@
  */
 function uc_paypaad_response($status) {
   switch ($status) {
-    case 'fail':
+    case 'failure':
 
     case 'success':
   }
