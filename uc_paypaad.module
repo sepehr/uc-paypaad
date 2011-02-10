@@ -12,17 +12,10 @@
 function uc_paypaad_menu() {
   $items = array();
 
-  $items['cart/paypaad/request'] = array(
-    'title' => 'Order payment request',
-    'page callback' => 'uc_paypaad_request',
-    'access callback' => 'uc_paypaad_access',
-    'file' => 'uc_paypaad.inc',
-    'type' => MENU_CALLBACK,
-  );
-
-  $items['cart/paypaad/complete'] = array(
-    'title' => 'Order payment complete',
-    'page callback' => 'uc_paypaad_complete',
+  $items['cart/paypaad/status/%'] = array(
+    'title' => 'Order payment status',
+    'page callback' => 'uc_paypaad_response',
+    'page arguments' => array(3),
     'access callback' => 'uc_paypaad_access',
     'file' => 'uc_paypaad.inc',
     'type' => MENU_CALLBACK,
