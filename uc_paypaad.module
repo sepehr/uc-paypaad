@@ -226,6 +226,9 @@ function _uc_paypaad_prepare(&$order) {
     return FALSE;
   }
 
+  // Set base path for response page.
+  global $base_root;
+  $response_path = $base_root . url('cart/paypaad/status');
   // Build content array out of the $order.
   $content = array(
     'items' => array(),
@@ -237,8 +240,8 @@ function _uc_paypaad_prepare(&$order) {
     'delivery_days' => variable_get('uc_paypaad_max_delivery_days', 1),
     'buyer_name' => $order->billing_first_name . ' ' . $order->billing_last_name,
     'delivery_address' => str_replace('<br />', ' - ', uc_order_address($order, 'billing')),
-    'redirect_address' => 'http://cart.dev/?redirect',
-    'referer_address'  => 'http://cart.dev/?referer',
+    'redirect_address' => $response_path . '/success',
+    'referer_address'  => $response_path . '/failure',
   );
   // Build items (products) array.
   foreach ($order->products as $index => $product) {
