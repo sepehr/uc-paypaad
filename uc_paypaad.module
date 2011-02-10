@@ -56,17 +56,35 @@ function uc_paypaad_payment_method() {
 /**
  * Implements hook_form_alter() for uc_cart_checkout_review_form.
  *
- * Alters the "action" attribute of the order review form,
- * so we can perform aditional actions to send user to gateway.
+ * Alters the order review form and injects required hidden fields,
+ * also alteres its action attribute, addressing the Paypaad gateway.
  */
 function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, $form_state) {
   // Check order identifier.
   $order_id = intval($_SESSION['cart_order']);
-  if ($order_id > 0) {
-    $order = uc_order_load($order_id);
-    // Alter form's action.
+  if ($order_id > 0 && ($order = uc_order_load($order_id))) {
+    // Alter the form if the it's a Paypaad payment.
     if ($order->payment_method == 'paypaad') {
-      $form['#action'] = url('cart/paypaad/request');
+      // Prepare the order object in form of Paypaad compatible
+      // arrays of invoice and products, then builds the XML and
+      // signed output of these arrays using Paypaad Payment API
+      // module. TODO: This should be moved to the API module.
+      if ($content = _uc_paypaad_prepare($order)) {
+        // Inject hidden fields.
+        // TODO: This should be moved to API module as UI helper.
+        // Inject XML invoice.
+        $form['content'] = array(
+          '#type' => 'hidden',
+          '#value' => $content['xml'],
+        );
+        // Inject signed copy of XML invoice.
+        $form['sign'] = array(
+          '#type' => 'hidden',
+          '#value' => $content['sign'],
+        );
+        // And update the form action.
+        $form['#action'] = variable_get('uc_paypaad_controller_uri', PAYPAAD_CONTROLLER_URI);
+      }
     }
   }
 }
