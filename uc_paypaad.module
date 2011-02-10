@@ -65,7 +65,10 @@ function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, $form_state)
         // Inject hidden fields.
         paypaad_hidden_fields($content, $sign, $form);
         // And update the form action.
-        $form['#action'] = variable_get('uc_paypaad_controller_uri', PAYPAAD_CONTROLLER_URI);
+        $form['#action'] = variable_get('paypaad_controller_uri', PAYPAAD_CONTROLLER_URI);
+      }
+      else {
+        // TODO: Error log.
       }
     }
   }
@@ -137,9 +140,9 @@ function _uc_paypaad_prepare(&$order) {
     'invoice_number' => $order->order_id,
     'buyer_tel' => $order->billing_phone,
     'total_amount' => $order->order_total,
-    'merchant_code'  => variable_get('uc_paypaad_merchant', ''),
-    'terminal_code'  => variable_get('uc_paypaad_terminal', ''),
-    'delivery_days' => variable_get('uc_paypaad_max_delivery_days', 1),
+    'merchant_code'  => variable_get('paypaad_merchant', ''),
+    'terminal_code'  => variable_get('paypaad_terminal', ''),
+    'delivery_days' => variable_get('paypaad_max_delivery_days', 1),
     'buyer_name' => $order->billing_first_name . ' ' . $order->billing_last_name,
     'delivery_address' => str_replace('<br />', ' - ', uc_order_address($order, 'billing')),
     'redirect_address' => $response_path . '/success',
@@ -159,12 +162,9 @@ function _uc_paypaad_prepare(&$order) {
   // And also their XML representation.
   if ($content = paypaad_xml($content, array(), TRUE)) {
     // Then the signature. "file://" make openssl_pkey_get_private() understand that it's a path.
-    if ($sign = paypaad_sign($content, 'file://' . variable_get('uc_paypaad_private_key', ''))) {
+    if ($sign = paypaad_sign($content, 'file://' . variable_get('paypaad_key_private', ''))) {
       // Return an array of content & signature.
-      return array(
-        'sign' => $sign,
-        'xml'  => $content,
-      );
+      return array($sign, $content);
     }
   }
   // Failure.
