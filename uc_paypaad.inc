@@ -27,3 +27,11 @@ function uc_paypaad_response($status) {
   }
 }
 
+/**
+ * Menu paths access callback.
+ *
+ * Ensures a free access to defined paths.
+ */
+function uc_paypaad_access() {
+  return TRUE;
+}
