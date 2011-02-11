@@ -127,6 +127,15 @@ function uc_paypaad_settings_validate($form, &$form_state) {
 }
 
 /**
+ * Menu paths access callback.
+ *
+ * Ensures a free access to defined paths.
+ */
+function uc_paypaad_access() {
+  return TRUE;
+}
+
+/**
  * Internal helper that build Paypaad compatible data out of an Ubercart order object.
  *
  * @param $order

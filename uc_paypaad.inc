@@ -7,15 +7,6 @@
  */
 
 /**
- * Menu paths access callback.
- *
- * Ensures a free access to defined paths.
- */
-function uc_paypaad_access() {
-  return TRUE;
-}
-
-/**
  * Menu callback for cart/paypaad/% path, handling gateway response.
  *
  * @param $status
