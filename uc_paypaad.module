@@ -67,8 +67,14 @@ function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, $form_state)
         // And update the form action.
         $form['#action'] = variable_get('paypaad_controller_uri', PAYPAAD_CONTROLLER_URI);
       }
+      // Error log.
       else {
-        // TODO: Error log.
+        watchdog(
+          'uc_paypaad',
+          'There were a problem preparing the order ID %order for Paypaad payment.',
+          array('%order' => $order->order_id),
+          WATCHDOG_ERROR
+        );
       }
     }
   }
