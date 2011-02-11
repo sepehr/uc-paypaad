@@ -56,7 +56,7 @@ function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, $form_state)
   // Check order identifier.
   $order_id = intval($_SESSION['cart_order']);
   if ($order_id > 0 && ($order = uc_order_load($order_id))) {
-    // Alter the form if the it's a Paypaad payment.
+    // Alter the form if it's a Paypaad payment.
     if ($order->payment_method == 'paypaad') {
       // Prepare the order object in form of Paypaad compatible
       // arrays of invoice and products, then build the XML and
