@@ -107,7 +107,8 @@ function uc_paypaad_ucga_display() {
  */
 function uc_paypaad_settings($op, &$arg1) {
   if ($op == 'settings') {
-    return paypaad_settings_fields(array(), 'uc');
+    $form = array();
+    return paypaad_settings_fields($form, 'uc');
   }
 }
 
@@ -172,7 +173,7 @@ function _uc_paypaad_prepare(&$order) {
     // Then the signature. "file://" make openssl_pkey_get_private() understand that it's a path.
     if ($sign = paypaad_sign($content, 'file://' . paypaad_settings('key_private', 'uc'))) {
       // Return an array of content & signature.
-      return array($sign, $content);
+      return array($content, $sign);
     }
   }
   // Failure.
