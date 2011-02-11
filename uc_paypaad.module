@@ -26,8 +26,6 @@ function uc_paypaad_menu() {
 
 /**
  * Implements hook_payment_method().
- *
- * @todo Add option to display bank logo beside the name.
  */
 function uc_paypaad_payment_method() {
   $methods = array();
@@ -51,6 +49,9 @@ function uc_paypaad_payment_method() {
  *
  * Alters the order review form and injects required hidden fields,
  * also alteres its action attribute, addressing the Paypaad gateway.
+ *
+ * @see _uc_paypaad_prepare()
+ * @see paypaad_hidden_fields()
  */
 function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, $form_state) {
   // Check order identifier.
@@ -84,6 +85,8 @@ function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, $form_state)
  * Implements hook_form_alter() for uc_payment_methods_form.
  *
  * Attaches an aditional form validation callback.
+ *
+ * @see uc_paypaad_settings_validate()
  */
 function uc_paypaad_form_uc_payment_methods_form_alter(&$form, $form_state) {
   $form['#validate'][] = 'uc_paypaad_settings_validate';
@@ -114,6 +117,8 @@ function uc_paypaad_settings($op, &$arg1) {
 
 /**
  * Form validation callback for settings form.
+ *
+ * Actually it's a wrapper to Paypaad Payment API's field validation helper.
  *
  * @see paypaad_settings_fields_validate()
  */
