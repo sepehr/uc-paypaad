@@ -142,7 +142,7 @@ function _uc_paypaad_prepare(&$order) {
 
   // Set base path for response page.
   global $base_root;
-  $response_path = $base_root . url('cart/paypaad/status');
+  $response_path = $base_root . url('cart/paypaad');
   // Build content array out of the $order.
   $content = array(
     'items' => array(),
