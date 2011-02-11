@@ -74,8 +74,8 @@ function _uc_paypaad_enquiry_validate($enquiry, $response) {
   if ($enquiry->result == 'true' &&
       $enquiry->invoice_date   == $response['invoice_date'] &&
       $enquiry->invoice_number == $response['invoice_number'] &&
-      $enquiry->merchant_code  == paypaad_settings('merchant', 'ui') &&
-      $enquiry->terminal_code  == paypaad_settings('terminal', 'ui') &&
+      $enquiry->merchant_code  == paypaad_settings('merchant', 'uc') &&
+      $enquiry->terminal_code  == paypaad_settings('terminal', 'uc') &&
       $enquiry-transaction_reference_id == $response['transaction_reference']) {
     return TRUE;
   }
