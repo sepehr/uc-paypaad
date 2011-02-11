@@ -7,17 +7,11 @@
  */
 
 /**
- * Implements hook_install().
+ * Implements hook_enable().
  */
-function uc_paypaad_install() {
-
-}
-
-
-/**
- * Implements hook_uninstall().
- */
-function uc_paypaad_uninstall() {
-
+function uc_paypaad_enable() {
+  drupal_set_message(st('Ubercart Paypaad Payment has been installed. Please set your settings in <a href="!link">configuration page</a>.',
+    array('!link' => url('admin/store/settings/payment/edit/methods'))
+  ));
 }
 
