@@ -70,7 +70,7 @@ function uc_paypaad_response($status) {
  * @see uc_paypaad_response()
  */
 function _uc_paypaad_transaction_validate($transaction, $response) {
-  // Value of $enquiry->result is not boolean typed.
+  // Value of $transaction->result is not boolean typed.
   if ($transaction->result == 'true' &&
       $transaction->invoice_date   == $response['invoice_date'] &&
       $transaction->invoice_number == $response['invoice_number'] &&
