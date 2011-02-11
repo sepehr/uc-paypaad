@@ -17,6 +17,7 @@ function uc_paypaad_menu() {
     'page callback' => 'uc_paypaad_response',
     'page arguments' => array(3),
     'access callback' => 'uc_paypaad_access',
+    'file' => 'uc_paypaad.inc',
     'type' => MENU_CALLBACK,
   );
 
@@ -105,27 +106,6 @@ function uc_paypaad_ucga_display() {
 function uc_paypaad_settings($op, &$arg1) {
   if ($op == 'settings') {
     return paypaad_settings_fields();
-  }
-}
-
-/**
- * Menu callback for cart/paypaad/% path.
- *
- * @param $status
- *   Paypaad gateway response status.
- *   - success
- *   - failure
- */
-function uc_paypaad_response($status) {
-  // Handle a successfull Paypaad payment.
-  if ($status == 'success' && $response = paypaad_response()) {
-    // TODO: Enquiry payment.
-    // TODO: Log payment through Paypaad Payment API.
-    // TODO: Complete the order.
-  }
-  // Handle a failed payment.
-  else {
-
   }
 }
 
