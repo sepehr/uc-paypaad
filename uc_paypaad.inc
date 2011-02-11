@@ -33,9 +33,11 @@ function uc_paypaad_response($status) {
     $enquiry = paypaad_trace($response['transaction_reference'], array(), paypaad_settings('trace_uri', 'uc', PAYPAAD_TRACE_URI));
     // Validate Paypaad transaction.
     if (_uc_paypaad_enquiry_validate($enquiry, $response)) {
-      // Save Paypaad payment transaction.
-      paypaad_transaction_save($enquiry);
-      // Complete the UC order.
+      // TODO: Save Paypaad payment transaction.
+
+      // TODO: Complete UC order workflow.
+
+      // TODO: Notify user and redirect.
     }
   }
 
