@@ -65,7 +65,7 @@ function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, $form_state)
         // Inject hidden fields.
         paypaad_hidden_fields($content, $sign, $form);
         // And update the form action.
-        $form['#action'] = variable_get('paypaad_controller_uri', PAYPAAD_CONTROLLER_URI);
+        $form['#action'] = paypaad_settings('controller_uri', 'uc', PAYPAAD_CONTROLLER_URI);
       }
       // Error log.
       else {
@@ -86,7 +86,7 @@ function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, $form_state)
  * Attaches an aditional form validation callback.
  */
 function uc_paypaad_form_uc_payment_methods_form_alter(&$form, $form_state) {
-  $form['#validate'][] = 'paypaad_settings_fields_validate';
+  $form['#validate'][] = 'uc_paypaad_settings_validate';
 }
 
 /**
@@ -95,27 +95,29 @@ function uc_paypaad_form_uc_payment_methods_form_alter(&$form, $form_state) {
  * @see http://api.ubercart.org/api/function/hook_ucga_display/2
  */
 function uc_paypaad_ucga_display() {
-  if (implode('/', arg()) == 'cart/paypaad/complete') {
+  if (implode('/', arg()) == 'cart/paypaad/success') {
     return TRUE;
   }
 }
 
 /**
  * Introduces Paypaad Payment settings form to Ubercart.
+ *
+ * @see paypaad_settings_fields()
  */
 function uc_paypaad_settings($op, &$arg1) {
   if ($op == 'settings') {
-    return paypaad_settings_fields();
+    return paypaad_settings_fields(array(), 'uc');
   }
 }
 
 /**
- * Menu paths access callback.
+ * Form validation callback for settings form.
  *
- * Ensures a free access to defined paths.
+ * @see paypaad_settings_fields_validate()
  */
-function uc_paypaad_access() {
-  return TRUE;
+function uc_paypaad_settings_validate($form, &$form_state) {
+  paypaad_settings_fields_validate($form, $form_state, 'uc');
 }
 
 /**
@@ -146,13 +148,13 @@ function _uc_paypaad_prepare(&$order) {
     'invoice_number' => $order->order_id,
     'buyer_tel' => $order->billing_phone,
     'total_amount' => $order->order_total,
-    'merchant_code'  => variable_get('paypaad_merchant', ''),
-    'terminal_code'  => variable_get('paypaad_terminal', ''),
-    'delivery_days' => variable_get('paypaad_max_delivery_days', 1),
-    'buyer_name' => $order->billing_first_name . ' ' . $order->billing_last_name,
-    'delivery_address' => str_replace('<br />', ' - ', uc_order_address($order, 'billing')),
+    'merchant_code'  => paypaad_settings('merchant', 'uc'),
+    'terminal_code'  => paypaad_settings('terminal', 'uc'),
+    'delivery_days'  => paypaad_settings('delivery_days', 'uc', 1),
     'redirect_address' => $response_path . '/success',
     'referer_address'  => $response_path . '/failure',
+    'delivery_address' => str_replace('<br />', ' - ', uc_order_address($order, 'billing')),
+    'buyer_name' => $order->billing_first_name . ' ' . $order->billing_last_name,
   );
   // Build items (products) array.
   foreach ($order->products as $index => $product) {
@@ -168,7 +170,7 @@ function _uc_paypaad_prepare(&$order) {
   // And also their XML representation.
   if ($content = paypaad_xml($content, array(), TRUE)) {
     // Then the signature. "file://" make openssl_pkey_get_private() understand that it's a path.
-    if ($sign = paypaad_sign($content, 'file://' . variable_get('paypaad_key_private', ''))) {
+    if ($sign = paypaad_sign($content, 'file://' . paypaad_settings('key_private', 'uc'))) {
       // Return an array of content & signature.
       return array($sign, $content);
     }
