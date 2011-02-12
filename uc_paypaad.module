@@ -15,7 +15,7 @@ function uc_paypaad_menu() {
   $items['cart/paypaad/%'] = array(
     'title' => 'Order payment status',
     'page callback' => 'uc_paypaad_response',
-    'page arguments' => array(3),
+    'page arguments' => array(2),
     'access callback' => 'uc_paypaad_access',
     'file' => 'uc_paypaad.inc',
     'type' => MENU_CALLBACK,
