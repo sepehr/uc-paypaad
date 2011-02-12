@@ -19,7 +19,7 @@ function uc_paypaad_response($status) {
   $order = uc_order_load((int) $_SESSION['cart_order']);
 
   // Handle a successfull Paypaad payment.
-  if ($status == 'success' && $response = paypaad_response() && $order) {
+  if ($status == 'success' && ($response = paypaad_response()) && $order) {
     // Enquiry payment.
     $transaction = paypaad_trace($response['transaction_reference'], array(), paypaad_settings('trace_uri', 'uc', PAYPAAD_TRACE_URI));
     // Validate Paypaad transaction.
@@ -62,12 +62,12 @@ function uc_paypaad_response($status) {
  */
 function _uc_paypaad_transaction_validate($transaction, $response) {
   // Value of $transaction->result is not boolean typed.
-  if ($transaction->result == 'true' &&
-      $transaction->invoice_date   == $response['invoice_date'] &&
-      $transaction->invoice_number == $response['invoice_number'] &&
-      $transaction->merchant_code  == paypaad_settings('merchant', 'uc') &&
-      $transaction->terminal_code  == paypaad_settings('terminal', 'uc') &&
-      $transaction->transaction_reference_id == $response['transaction_reference']) {
+  if ($transaction['result'] == 'true' &&
+      $transaction['invoice_date']   == $response['invoice_date'] &&
+      $transaction['invoice_number'] == $response['invoice_number'] &&
+      $transaction['merchant_code']  == paypaad_settings('merchant', 'uc') &&
+      $transaction['terminal_code']  == paypaad_settings('terminal', 'uc') &&
+      $transaction['transaction_reference_id'] == $response['transaction_reference']) {
     return TRUE;
   }
   // Validation failed.
