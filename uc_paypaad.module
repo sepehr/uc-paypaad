@@ -182,7 +182,10 @@ function _uc_paypaad_prepare(&$order) {
       'description' => $product->qty . ' x ' . $product->price . ' - ' . $product->title,
     );
   }
-  // And also their XML representation.
+
+  // TODO: Add discount & shipping quote as transaction items.
+
+  // Also build the XML representation.
   if ($content = paypaad_xml($content, array(), TRUE)) {
     // Then the signature. "file://" make openssl_pkey_get_private() understand that it's a path.
     if ($sign = paypaad_sign($content, 'file://' . paypaad_settings('key_private', 'uc'))) {
