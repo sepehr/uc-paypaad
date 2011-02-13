@@ -27,25 +27,26 @@ function uc_paypaad_response($status) {
       // Save Paypaad payment transaction.
       paypaad_save($transaction, $order->order_id, 'uc_paypaad');
       // UC order completion workflow...
-      $message = t('Total amount of %amount has been successfully paid via %method. Payment transaction reference is %reference.',
+      $comment = t('Total amount of "!amount" has been successfully paid via "!method". Payment transaction reference is "!reference".',
         array(
-          '%method' => ucwords($order->payment_method),
-          '%reference' => $transaction['transaction_reference_id'],
-          '%amount' => uc_currency_format(intval($transaction['amount']), TRUE, TRUE, NULL),
+          '!method' => ucwords($order->payment_method),
+          '!reference' => $transaction['transaction_reference_id'],
+          '!amount' => uc_currency_format(intval($transaction['amount']), TRUE, TRUE, NULL),
         )
       );
       // Enter payment for the order.
-      uc_payment_enter($order->order_id, $order->payment_method, $order->order_total, 0, array('reference' => $transaction['transaction_reference_id']), $message);
-      // Log comments to order, for both customer & admin.
-      uc_order_comment_save($order->order_id, 0, $message);
-      uc_order_comment_save($order->order_id, 0, $message, 'order', $order->order_status, TRUE);
+      uc_payment_enter($order->order_id, $order->payment_method, $order->order_total, 0, array('reference' => $transaction['transaction_reference_id']), $comment);
       // Let her know the reference number.
-      drupal_set_message($message);
-      // Empty cart, Update order status, register customer if required
+      drupal_set_message($comment);
+      // Empty user cart, Update order status, register customer if required
       // and log her in. Also get the themed output of order completion page.
       $message = uc_cart_complete_sale($order, TRUE);
       // Notify user about order completion.
       drupal_set_message($message);
+      // Log comments to order, for both customer & admin.
+      // Needs to be called after uc_cart_complete_sale().
+      uc_order_comment_save($order->order_id, 0, $comment);
+      uc_order_comment_save($order->order_id, 0, $comment, 'order', uc_order_state_default('post_checkout'), TRUE);
       // And redirect to the proper end!
       drupal_goto(variable_get('uc_cart_checkout_complete_page', 'cart'));
     }
