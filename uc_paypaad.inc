@@ -24,19 +24,35 @@ function uc_paypaad_response($status) {
     $transaction = paypaad_trace($response['transaction_reference'], array(), paypaad_settings('trace_uri', 'uc', PAYPAAD_TRACE_URI));
     // Validate Paypaad transaction.
     if (_uc_paypaad_transaction_validate($transaction, $response, $order)) {
-      // TODO: Save Paypaad payment transaction.
-
-      // TODO: Complete UC order workflow.
-
-      // TODO: Notify user and redirect.
-      drupal_set_message('done');
-      drupal_goto('cart');
+      // Save Paypaad payment transaction.
+      paypaad_save($transaction, $order->order_id, 'uc_paypaad');
+      // UC order completion workflow...
+      $message = t('Total amount of %amount has been successfully paid via %method for this order. Payment transaction reference is %reference.',
+        array(
+          '%method' => ucwords($order->payment_method),
+          '%reference' => $transaction['transaction_reference_id'],
+          '%amount' => uc_currency_format(intval($transaction['transaction_reference_id']), TRUE, TRUE, NULL),
+        )
+      );
+      // Enter payment for the order.
+      uc_payment_enter($order->order_id, $order->payment_method, $order->order_total, 0, array('reference' => $transaction['transaction_reference_id']), $message);
+      // Log comments to order, for both customer & admin.
+      uc_order_comment_save($order->order_id, 0, $message);
+      uc_order_comment_save($order->order_id, 0, $message, 'order', $order->order_status, TRUE);
+      // Let her know the reference number.
+      drupal_set_message($message);
+      // Empty cart, Update order status, register customer if required
+      // and log her in. Also get the themed output of order completion page.
+      $message = uc_cart_complete_sale($order, TRUE);
+      // Notify user about order completion.
+      drupal_set_message($message);
+      // And redirect to the proper end!
+      drupal_goto(variable_get('uc_cart_checkout_complete_page', 'cart'));
     }
   }
 
   // Handle a failed payment, Notify user.
   drupal_set_message(t('There were a problem processing your payment via Paypaad, please try again.'), 'error');
-  dpm($_GET);
   // Log a watchdog error.
   watchdog(
     'uc_paypaad',
@@ -69,7 +85,8 @@ function _uc_paypaad_transaction_validate($transaction, $response, $order) {
   // Value of $transaction->result is not boolean typed.
   if ($transaction['result'] == 'true' &&
       $transaction['invoice_number'] == $order->order_id &&
-      $transaction['invoice_date']   == $response['invoice_date'] &&
+      intval($transaction['amount']) == intval($order->order_total) &&
+      $transaction['invoice_date']   == $response['invoice_date']   &&
       $transaction['invoice_number'] == $response['invoice_number'] &&
       $transaction['merchant_code']  == paypaad_settings('merchant', 'uc') &&
       $transaction['terminal_code']  == paypaad_settings('terminal', 'uc') &&
