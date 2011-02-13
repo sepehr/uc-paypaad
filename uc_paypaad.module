@@ -172,18 +172,35 @@ function _uc_paypaad_prepare(&$order) {
     'buyer_name' => $order->billing_first_name . ' ' . $order->billing_last_name,
   );
   // Build items (products) array.
-  foreach ($order->products as $index => $product) {
+  $number = 0;
+  foreach ($order->products as $product) {
     $content['items'][] = array(
       'fee' => $product->price,
       'count' => $product->qty,
-      'number' => (int) $index + 1,
+      'number' => ++$number,
       'content' => $product->title,
       'amount' => intval($product->qty) * intval($product->price),
-      'description' => $product->qty . ' x ' . $product->price . ' - ' . $product->title,
+      'description' => isset($product->description) ? $product->description : '',
     );
   }
 
-  // TODO: Add discount & shipping quote as transaction items.
+  // Append discount, taxes & shipping quote to transaction items.
+  foreach ($order->line_items as $item) {
+    // Skip subtotal items.
+    if ($item['type'] == 'subtotal' || $item['type'] == 'tax_subtotal') {
+      continue;
+    }
+    // Append others as transaction items.
+    $content['items'][] = array(
+      'fee' => (int) $item['amount'],
+      'count' => 1,
+      'number' => ++$number,
+      'content' => $item['title'],
+      'amount' => (int) $item['amount'],
+      'description' => isset($item->description) ? $item->description : '',
+    );
+  }
+  unset($number);
 
   // Also build the XML representation.
   if ($content = paypaad_xml($content, array(), TRUE)) {
