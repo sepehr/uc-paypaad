@@ -27,7 +27,7 @@ function uc_paypaad_response($status) {
       // Save Paypaad payment transaction.
       paypaad_save($transaction, $order->order_id, 'uc_paypaad');
       // UC order completion workflow...
-      $message = t('Total amount of %amount has been successfully paid via %method for this order. Payment transaction reference is %reference.',
+      $message = t('Total amount of %amount has been successfully paid via %method. Payment transaction reference is %reference.',
         array(
           '%method' => ucwords($order->payment_method),
           '%reference' => $transaction['transaction_reference_id'],
