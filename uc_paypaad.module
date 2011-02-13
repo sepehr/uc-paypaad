@@ -187,7 +187,7 @@ function _uc_paypaad_prepare(&$order) {
   // Append discount, taxes & shipping quote to transaction items.
   foreach ($order->line_items as $item) {
     // Skip subtotal items, also zero valued amounts.
-    if ($item['type'] == 'subtotal' || $item['type'] == 'tax_subtotal' || !$item['amount']) {
+    if ($item['type'] == 'subtotal' || $item['type'] == 'tax_subtotal' || !intval($item['amount'])) {
       continue;
     }
     // Append others as transaction items.
