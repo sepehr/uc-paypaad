@@ -31,7 +31,7 @@ function uc_paypaad_response($status) {
         array(
           '%method' => ucwords($order->payment_method),
           '%reference' => $transaction['transaction_reference_id'],
-          '%amount' => uc_currency_format(intval($transaction['transaction_reference_id']), TRUE, TRUE, NULL),
+          '%amount' => uc_currency_format(intval($transaction['amount']), TRUE, TRUE, NULL),
         )
       );
       // Enter payment for the order.
