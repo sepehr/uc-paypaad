@@ -25,7 +25,9 @@ function uc_paypaad_response($status) {
     // Validate Paypaad transaction.
     if (_uc_paypaad_transaction_validate($transaction, $response, $order)) {
       // Save Paypaad payment transaction.
-      paypaad_save($transaction, 'admin/store/orders/' . $order->order_id, 'uc_paypaad');
+      global $user;
+      $entity_path = $user->uid ? "user/{$user->uid}/order/{$order->order_id}" : '';
+      paypaad_save($transaction, $entity_path, 'uc_paypaad');
       // UC order completion workflow...
       $comment = t('Total amount of "!amount" has been successfully paid via "!method". Payment transaction reference is "!reference".',
         array(
