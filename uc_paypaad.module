@@ -68,8 +68,11 @@ function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, $form_state)
         // And update the form action.
         $form['#action'] = paypaad_settings('controller_uri', 'uc', PAYPAAD_CONTROLLER_URI);
       }
-      // Error log.
+      // Problems!
       else {
+        // Notify customer.
+        drupal_set_message(t('There were a problem preparing your order for Paypaad payment. Please try again later.'), 'error');
+        // And log.
         watchdog(
           'uc_paypaad',
           'There were a problem preparing the order ID %order for Paypaad payment.',
@@ -168,8 +171,8 @@ function _uc_paypaad_prepare(&$order) {
     'delivery_days'  => paypaad_settings('delivery_days', 'uc', 1),
     'redirect_address' => $response_path . '/success',
     'referer_address'  => $response_path . '/failure',
-    'delivery_address' => str_replace('<br />', ' - ', uc_order_address($order, 'billing')),
     'buyer_name' => $order->billing_first_name . ' ' . $order->billing_last_name,
+    'delivery_address' => check_plain(str_ireplace('<br />', ' - ', uc_order_address($order, 'billing'))),
   );
   // Build items (products) array.
   $number = 0;
@@ -180,7 +183,7 @@ function _uc_paypaad_prepare(&$order) {
       'number' => ++$number,
       'content' => $product->title,
       'amount' => intval($product->qty) * intval($product->price),
-      'description' => isset($product->description) ? $product->description : '',
+      'description' => isset($product->description) ? $product->description : '-',
     );
   }
 
@@ -197,7 +200,7 @@ function _uc_paypaad_prepare(&$order) {
       'number' => ++$number,
       'content' => $item['title'],
       'amount' => (int) $item['amount'],
-      'description' => isset($item->description) ? $item->description : '',
+      'description' => isset($item->description) ? $item->description : '-',
     );
   }
   unset($number);
