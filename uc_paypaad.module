@@ -71,14 +71,16 @@ function uc_paypaad_form_uc_cart_checkout_review_form_alter(&$form, $form_state)
       // Problems!
       else {
         // Notify customer.
-        drupal_set_message(t('There were a problem preparing your order for Paypaad payment. Please try again later.'), 'error');
-        // And log.
+        drupal_set_message(t('There were a problem preparing your order for Paypaad payment. If possible, choose another payment method or try again later.'), 'error');
+        // Notify the dog!
         watchdog(
           'uc_paypaad',
           'There were a problem preparing the order ID %order for Paypaad payment.',
           array('%order' => $order->order_id),
           WATCHDOG_ERROR
         );
+        // And return to checkout page.
+        drupal_goto('cart/checkout');
       }
     }
   }
