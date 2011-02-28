@@ -1,4 +1,3 @@
-; $Id$
 name = "Pasargad Bank Paypaad"
 description = "Process payments using Pasargad Bank Paypaad gateway."
 core = 6.x
