@@ -167,7 +167,9 @@ function _uc_paypaad_prepare(&$order) {
     'items' => array(),
     'invoice_number' => $order->order_id,
     'buyer_tel' => $order->billing_phone,
-    'total_amount' => $order->order_total,
+    // 32-bit machines' signed integer range is up to 2147483647,
+    // and it's pretty enough for Iran online transactions.
+    'total_amount'   => (int) $order->order_total,
     'merchant_code'  => paypaad_settings('merchant', 'uc'),
     'terminal_code'  => paypaad_settings('terminal', 'uc'),
     'delivery_days'  => paypaad_settings('delivery_days', 'uc', 1),
@@ -180,10 +182,10 @@ function _uc_paypaad_prepare(&$order) {
   $number = 0;
   foreach ($order->products as $product) {
     $content['items'][] = array(
-      'fee' => $product->price,
-      'count' => $product->qty,
       'number' => ++$number,
+      'count' => $product->qty,
       'content' => $product->title,
+      'fee' => (int) $product->price,
       'amount' => intval($product->qty) * intval($product->price),
       'description' => isset($product->description) ? $product->description : '-',
     );
