@@ -1,5 +1,3 @@
-// $Id$
-
 Description
 ===========
 Ubercart Pasargad Bank Paypaad Payment provides Ubercart 2.x a new "Payment Method" to process its online payments
