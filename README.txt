@@ -5,8 +5,8 @@ through the Paypaad Payment (http://paypaad.ir/) gateway.
 
 Requirements
 ============
-  - Paypaad 9-digit merchant code.
-  - Paypaad 10-digit terminal code.
+  - Paypaad merchant code.
+  - Paypaad terminal code.
   - Private key file provided by Paypaad.
 
 Dependencies
