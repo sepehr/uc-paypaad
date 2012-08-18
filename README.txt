@@ -11,7 +11,7 @@ Requirements
 
 Dependencies
 ============
-  - Paypaad Payment API (http://github.com/sepehr/paypaad-api)
+  - Paypaad Payment API (http://github.com/sepehr/drupal-paypaad-api)
 
 Installation
 ============
